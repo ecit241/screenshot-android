@@ -1,7 +1,7 @@
 screenshot-android
 ==================
 
-Port screenshot from Android 4.x to Android 2.x
+Compile screenshot from Android 4.x to Android 2.x
 
 Source base on Android 4.4 (Kitkat) [Source Code][1]
 
