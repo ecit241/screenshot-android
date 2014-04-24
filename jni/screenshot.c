@@ -20,6 +20,7 @@ void take_screenshot(FILE *fb_in, FILE *fb_out) {
     int fb;
     char imgbuf[0x10000];
     struct fb_var_screeninfo vinfo;
+    struct fb_fix_screeninfo finfo;
     png_structp png;
     png_infop info;
     unsigned int r,c,rowlen;
@@ -31,7 +32,10 @@ void take_screenshot(FILE *fb_in, FILE *fb_out) {
         return;
     }
     fb_in = fdopen(fb, "r");
-
+    if(ioctl(fb, FBIOGET_FSCREENINFO, &finfo) < 0) {
+        ALOGE("failed to get framebuffer info\n");
+        return;
+    }
     if(ioctl(fb, FBIOGET_VSCREENINFO, &vinfo) < 0) {
         ALOGE("failed to get framebuffer info\n");
         return;
@@ -60,7 +64,17 @@ void take_screenshot(FILE *fb_in, FILE *fb_out) {
         return;
     }
 
+    ALOGE("------------------------------------\n");
+    ALOGE("fb0 smem_len: %d\n", finfo.smem_len);
+    ALOGE("fb0 line_length: %d\n", finfo.line_length);
+    ALOGE("xres:%d\n", vinfo.xres);
+    ALOGE("yres:%d\n", vinfo.yres);
+    ALOGE("xres_virtual:%d\n", vinfo.xres_virtual);
+    ALOGE("yres_virtual:%d\n", vinfo.yres_virtual);
+
     bytespp = vinfo.bits_per_pixel / 8;
+    vinfo.xres = finfo.line_length / bytespp;
+    ALOGE("new xres:%d\n", vinfo.xres);
     png_set_IHDR(png, info,
         vinfo.xres, vinfo.yres, vinfo.bits_per_pixel / 4,
         PNG_COLOR_TYPE_RGB_ALPHA, PNG_INTERLACE_NONE,
